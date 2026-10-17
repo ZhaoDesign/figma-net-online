@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0c0d10" />
+    <meta name="description" content="Figma Net Online：在本机真实测速，找到当前最快的 Figma 连接线路。" />
+    <title>Figma Net Online · 连接诊断</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="Figma Net Online 首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img"><path d="M7 9.5 16 5l9 4.5v13L16 27l-9-4.5z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m7.5 10 8.5 4.5 8.5-4.5M16 14.5V27" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          </span>
+          <span>
+            <strong>Figma Net</strong>
+            <em>Online</em>
+          </span>
+        </a>
+        <nav class="top-actions" aria-label="辅助操作">
+          <button class="quiet-button" id="helperButton" type="button">
+            <span class="status-dot" id="helperDot"></span>
+            <span id="helperLabel">检测本地助手</span>
+            <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+          <button class="icon-button" id="themeButton" type="button" aria-label="切换显示模式" title="切换显示模式">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.9 12.2A6.3 6.3 0 0 1 7.8 4.1 6.3 6.3 0 1 0 15.9 12.2Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+          </button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="eyebrow-line"></span> Network intelligence for Figma</p>
+            <h1>让 Figma<br /><span>连接回到最快。</span></h1>
+            <p class="hero-description">在你的真实网络环境里测试 Figma 线路，找到此刻最稳定的连接，然后一键应用到本机。</p>
+            <div class="hero-meta">
+              <span class="meta-pill"><span class="pill-dot"></span>本机测速 · 不上传配置</span>
+              <span class="meta-text">适用于直连 Figma 的网络环境</span>
+            </div>
+          </div>
+          <div class="signal-card" aria-label="当前连接状态">
+            <div class="signal-orbit orbit-one"></div>
+            <div class="signal-orbit orbit-two"></div>
+            <div class="signal-center"><span class="signal-pulse"></span><strong id="signalValue">—</strong><small>ms</small></div>
+            <div class="signal-label"><span>当前 Figma 连接</span><b id="signalStatus">等待测速</b></div>
+            <div class="signal-axis axis-left"><span>latency</span><b id="signalLatency">—</b></div>
+            <div class="signal-axis axis-right"><span>route</span><b id="signalRoute">未选择</b></div>
+          </div>
+        </section>
+
+        <section class="workspace-grid">
+          <div class="main-column">
+            <section class="panel test-panel" aria-labelledby="test-heading">
+              <div class="panel-heading">
+                <div>
+                  <span class="section-index">01</span>
+                  <h2 id="test-heading">开始诊断</h2>
+                </div>
+                <span class="last-run" id="lastRun">尚未运行</span>
+              </div>
+              <div class="mode-switch" role="tablist" aria-label="测速模式">
+                <button class="mode-option is-active" type="button" data-mode="fast" role="tab" aria-selected="true">
+                  <span class="mode-icon">⌁</span><span><b>快速模式</b><small>常用 DNS · 约 20 秒</small></span>
+                </button>
+                <button class="mode-option" type="button" data-mode="full" role="tab" aria-selected="false">
+                  <span class="mode-icon">✣</span><span><b>全面模式</b><small>全部线路 · 约 60 秒</small></span>
+                </button>
+              </div>
+              <div class="test-action-row">
+                <div class="action-note"><span class="ready-icon">✓</span><span id="actionHint">准备测试本地 DNS 与常用线路</span></div>
+                <button class="primary-button" id="startButton" type="button"><span>开始测速</span><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9h11M9.5 4.5 14 9l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+            </section>
+
+            <section class="panel result-panel" aria-labelledby="result-heading">
+              <div class="panel-heading result-heading">
+                <div><span class="section-index">02</span><h2 id="result-heading">线路结果</h2></div>
+                <div class="result-summary"><span class="summary-dot"></span><span id="resultSummary">等待一次测速</span></div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>域名</th><th>最佳 IP</th><th>位置</th><th>延迟</th><th>状态</th></tr></thead>
+                  <tbody id="resultsBody">
+                    <tr class="empty-row"><td colspan="5"><div class="empty-state"><span class="empty-ring"></span><b>还没有诊断结果</b><small>选择模式并开始测速，结果会显示在这里</small></div></td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="result-footer">
+                <span><span class="legend-dot green"></span>低延迟 &lt; 120 ms</span><span><span class="legend-dot amber"></span>可用 120–240 ms</span><span><span class="legend-dot gray"></span>未完成或不可用</span>
+              </div>
+            </section>
+          </div>
+
+          <aside class="side-column">
+            <section class="panel hosts-panel" aria-labelledby="hosts-heading">
+              <div class="panel-heading compact-heading"><div><span class="section-index">03</span><h2 id="hosts-heading">本机配置</h2></div><button class="refresh-button" id="refreshHosts" type="button" title="重新读取 Hosts"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M14.5 7A5.5 5.5 0 1 0 15 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12.5 3.5h3v3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+              <div class="hosts-status" id="hostsStatus"><span class="hosts-status-icon">—</span><div><b>尚未读取本机 Hosts</b><small>连接本地助手后自动检测</small></div></div>
+              <div class="hosts-list" id="hostsList"></div>
+              <div class="path-row"><span>文件位置</span><code id="hostsPath">/etc/hosts</code></div>
+              <div class="hosts-actions"><button class="secondary-button" id="resetButton" type="button" disabled>重置 Figma 配置</button><button class="apply-button" id="applyButton" type="button" disabled>应用最佳线路</button></div>
+            </section>
+
+            <section class="panel activity-panel" aria-labelledby="activity-heading">
+              <div class="panel-heading compact-heading"><div><span class="section-index">04</span><h2 id="activity-heading">活动日志</h2></div><span class="live-label"><span></span>LIVE</span></div>
+              <div class="activity-feed" id="activityFeed" aria-live="polite"><div class="activity-item muted"><span class="activity-time">—</span><span>等待开始诊断</span></div></div>
+            </section>
+
+            <section class="tip-card"><span class="tip-icon">i</span><div><b>关于 Hosts</b><p>配置只作用于本机，网站不会读取或上传你的完整 Hosts 文件。</p></div><button id="learnButton" type="button" aria-label="查看说明">↗</button></section>
+          </aside>
+        </section>
+      </main>
+
+      <footer class="footer"><span>Figma Net Online · v0.1 preview</span><span>本工具不使用代理，仅优化直连线路</span></footer>
+    </div>
+
+    <div class="modal-backdrop" id="helperModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <button class="modal-close" id="closeModal" type="button" aria-label="关闭">×</button>
+        <div class="modal-mark"><span class="status-dot"></span></div>
+        <p class="eyebrow">Local bridge</p>
+        <h2 id="modalTitle">连接本地助手</h2>
+        <p class="modal-copy">网站需要一个轻量本地助手来执行真实 DNS / HTTPS 测速，并在获得系统授权后更新 Hosts 文件。</p>
+        <div class="install-steps"><div><span>1</span><p><b>下载并安装</b><small>选择你的系统版本，首次安装即可。</small></p></div><div><span>2</span><p><b>回到此页面</b><small>点击“重新检测”，状态会自动变为已连接。</small></p></div><div><span>3</span><p><b>开始诊断</b><small>后续测速和应用线路都在网页内完成。</small></p></div></div>
+        <div class="download-row"><button class="secondary-button" id="macDownload" type="button">macOS 安装包 <small>即将提供</small></button><button class="secondary-button" id="winDownload" type="button">Windows 安装包 <small>即将提供</small></button></div>
+        <div class="modal-actions"><button class="primary-button full-button" id="retryHelper" type="button"><span>重新检测助手</span><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 9h11M9.5 4.5 14 9l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <p class="modal-footnote">本地助手只监听 127.0.0.1，不会对外开放端口。</p>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-icon">✓</span><span id="toastText"></span></div>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
