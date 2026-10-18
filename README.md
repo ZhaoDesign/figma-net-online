@@ -22,6 +22,7 @@ Node.js 18 或更高版本：
 
 ```bash
 cd helper
+npm install
 npm start
 ```
 

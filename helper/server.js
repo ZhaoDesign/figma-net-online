@@ -5,6 +5,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { URL } = require("node:url");
+const sudo = require("sudo-prompt");
 
 const PORT = Number(process.env.FIGMA_NET_PORT || 47821);
 const VERSION = "0.1.0";
@@ -13,6 +14,7 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:4173",
   "http://localhost:8080",
   "http://127.0.0.1:8080",
+  "https://zhaodesign.github.io",
   "https://figma-net-online.zhaojianbin2002.chatgpt.site",
 ]);
 
@@ -116,15 +118,39 @@ function updateHosts(entries) {
   const current = fs.readFileSync(file, "utf8");
   const cleaned = withRemovedTargets(current);
   const block = ["# Figma Net Online BEGIN", ...entries.map((entry) => `${entry.ip} ${entry.hostname}`), "# Figma Net Online END"].join("\n");
-  fs.writeFileSync(file, `${cleaned}\n${block}\n`, "utf8");
-  return readHosts();
+  return writeHosts(`${cleaned}\n${block}\n`).then(() => readHosts());
 }
 
 function resetHosts() {
   const file = hostsPath();
   const current = fs.readFileSync(file, "utf8");
-  fs.writeFileSync(file, withRemovedTargets(current), "utf8");
-  return readHosts();
+  return writeHosts(withRemovedTargets(current)).then(() => readHosts());
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, `'\\''`)}'`;
+}
+
+function writeHosts(content) {
+  const file = hostsPath();
+  try {
+    fs.writeFileSync(file, content, "utf8");
+    return Promise.resolve();
+  } catch (error) {
+    if (error.code !== "EACCES" && error.code !== "EPERM") return Promise.reject(error);
+  }
+  const tempFile = path.join(os.tmpdir(), `figma-net-online-hosts-${process.pid}-${Date.now()}.tmp`);
+  fs.writeFileSync(tempFile, content, { encoding: "utf8", mode: 0o600 });
+  const command = process.platform === "win32"
+    ? `cmd.exe /c copy /Y ${shellQuote(tempFile)} ${shellQuote(file)}`
+    : `/bin/cp ${shellQuote(tempFile)} ${shellQuote(file)}`;
+  return new Promise((resolve, reject) => {
+    sudo.exec(command, { name: "Figma Net Online" }, (error, stdout, stderr) => {
+      try { fs.unlinkSync(tempFile); } catch {}
+      if (error) return reject(new Error(stderr?.trim() || error.message || "管理员授权失败"));
+      resolve();
+    });
+  });
 }
 
 function resolveWithServer(hostname, server) {
@@ -245,9 +271,9 @@ async function route(request, response) {
     if (request.method === "POST" && url.pathname === "/api/hosts/apply") {
       const payload = await body(request);
       if (!validHosts(payload.hosts)) return json(response, 400, { message: "线路数据无效" }, origin);
-      return json(response, 200, updateHosts(payload.hosts), origin);
+      return json(response, 200, await updateHosts(payload.hosts), origin);
     }
-    if (request.method === "POST" && url.pathname === "/api/hosts/reset") return json(response, 200, resetHosts(), origin);
+    if (request.method === "POST" && url.pathname === "/api/hosts/reset") return json(response, 200, await resetHosts(), origin);
     return json(response, 404, { message: "接口不存在" }, origin);
   } catch (error) {
     const message = error.code === "EACCES" || error.code === "EPERM" ? "没有权限修改 Hosts，请以管理员权限启动本地助手。" : error.message;

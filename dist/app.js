@@ -1,4 +1,5 @@
 const HELPER_BASE = "http://127.0.0.1:47821";
+const RELEASES_URL = "https://github.com/ZhaoDesign/figma-net-online/releases";
 const DEMO_MODE = new URLSearchParams(window.location.search).has("demo");
 const TARGET_HOSTS = ["s3-alpha-sig.figma.com", "www.figma.com", "static.figma.com"];
 
@@ -249,8 +250,8 @@ function bindEvents() {
   $("#closeModal").addEventListener("click", closeHelperModal);
   $("#helperModal").addEventListener("click", (event) => { if (event.target === $("#helperModal")) closeHelperModal(); });
   $("#retryHelper").addEventListener("click", async () => { const online = await checkHelper({ announce: true }); if (online) closeHelperModal(); });
-  $("#macDownload").addEventListener("click", () => showToast("macOS 安装包将在 GitHub Releases 发布"));
-  $("#winDownload").addEventListener("click", () => showToast("Windows 安装包将在 GitHub Releases 发布"));
+  $("#macDownload").addEventListener("click", () => window.open(RELEASES_URL, "_blank", "noopener,noreferrer"));
+  $("#winDownload").addEventListener("click", () => window.open(RELEASES_URL, "_blank", "noopener,noreferrer"));
   $("#learnButton").addEventListener("click", () => showToast("网页只读取 Figma 相关条目，不会上传完整 Hosts 文件"));
   $("#themeButton").addEventListener("click", () => { document.body.classList.toggle("light"); localStorage.setItem("fno-theme", document.body.classList.contains("light") ? "light" : "dark"); });
 }
